@@ -1,22 +1,21 @@
 package com.example.dao_hibernate;
 
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-@Transactional
-public class PersonRepository {
-    @PersistenceContext
-    protected EntityManager entityManager;
+public interface PersonRepository  extends JpaRepository<Person, PersonId> {
+    @Query("Select p from Person p where p.cityOfLiving = :city")
+    List<Person> findByCityOfLiving(String city);
+    @Query("Select p from Person p where p.age < :age Order by p.age asc")
+    List<Person> findByAgeLessThanOrderByAgeAsc(Integer age);
+    @Query("Select p from Person p where p.name = :name and p.surname = :surname")
+    Optional<Person> findByNameAndSurname(
+            @Param("name") String name,
+            @Param("surname") String surname);
 
-    public List<Person> getPersonsByCity(String city) {
-        return entityManager.createQuery("SELECT p FROM Person p WHERE p.cityOfLiving = :city", Person.class)
-                .setParameter("city", city).getResultList();
-    }
 }
 
